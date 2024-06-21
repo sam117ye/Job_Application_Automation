@@ -62,3 +62,4 @@ This project integrates various technologies including Streamlit for web app dev
    - save into a PDF FIle
 
 * Train model automaticlly from new scrapped data
+.
