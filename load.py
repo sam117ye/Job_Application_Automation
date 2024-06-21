@@ -40,7 +40,7 @@ def load_files():
 
     return model, label_encoders, target_encoder, data, prediction_results
 
-openai.api_key = "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"
+openai.api_key = "API_KEY"
 
 
 # Function to get GPT embeddings for job descriptions

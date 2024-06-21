@@ -14,9 +14,6 @@ for i, text in enumerate(generated_text):
 import openai
 from fpdf import FPDF
 
-# import open ai to generate text
-openai.api_key = "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"
-
 response = openai.Completion.create(
     engine="gpt-3.5-turbo-instruct",
     prompt="Generate applicaton letter for the position of Data Scientist at Nestle",

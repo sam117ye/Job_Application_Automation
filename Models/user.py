@@ -42,7 +42,7 @@ data['job_title'] = target_encoder.fit_transform(data['job_title'])
 
 
 # Function to get GPT embeddings for job descriptions
-openai.api_key = "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"
+openai.api_key = "API_KEY"
 
 def get_gpt_embedding(text, model="text-embedding-3-small"):
    text = text.replace("\n", " ")
