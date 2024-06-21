@@ -1,5 +1,6 @@
 import streamlit as st
 from streamlit_option_menu import option_menu
+import streamlit_authenticator as stauth
 
 import numpy as np
 import openai
@@ -10,6 +11,10 @@ import sqlite3
 from bs4 import BeautifulSoup
 import requests
 import os
+
+# User authentication
+
+stauth.authenticate()
 
 # Connect to the SQLite database
 conn = sqlite3.connect('job_application.db')
@@ -80,6 +85,7 @@ model = load_model(saved_files['model_file'])
 # Load the encoders
 with open(saved_files['label_encoders'], 'rb') as handle:
     label_encoders = pickle.load(handle)
+    
 with open(saved_files['target_encoder'], 'rb') as handle:
     target_encoder = pickle.load(handle)
 

@@ -7,41 +7,22 @@ import os
 
 
 # Define the job title and location
-title = "Machine Learning Engineer"  # Job title
-location = "Germany"  # Job location
-results_per_page = 25  # Number of results per page
+title = "3D designer"  # Job title
+location = "USA"  # Job location
+results_per_page = 25 # Number of results per page
 
-"""
-# Define the job titles and locations
-title = ["Machine Learning Engineer", "Data Engineer", "Business Intelligence Analyst", "Data Architect", "Data Analyst", "Data Scientist", "Data Engineer", "Data An", "Back-end developer", "Cloud/software architect", "Cloud/software developer", "Cloud/software applications engineer", "Cloud system administrator", "Cloud system engineer", "DevOps engineer", "Front-end developer", "Full-stack developer", "Java developer", "Platform engineer", "Release manager", "Reliability engineer", "Software engineer", "Software quality assurance analyst", "UI (user interface) designer", "UX (user experience) designer", "Web develope"]
-location = ["London", "Berlin", "Paris", "Rome", "Venice", "Florence", "Amsterdam", "Athens", "Barcelona", "Dublin", "New York", "Los Angeles", "Chicago", "Houston", "Phoenix", "Philadelphia", "San Antonio", "San Diego", "Dallas", "San Jose", "Geneva", "Zürich", "Basel", "Lusanne", "Bern", "Lucerne"]
-results_per_page = 50  # Number of results per page
-"""
 
-def load_proxies(url):
-    proxies = []
-    try:
-        response = requests.get(url)
-        response.raise_for_status()  # Raise an exception if the GET request was unsuccessful
-    except requests.exceptions.RequestException as err:
-        print(f"An error occurred: {err}")
-    else:
-        proxies = response.text.split('\n')
-    return proxies
 
 # Initialize an empty list to store job information
 job_list = []
 
 # Function to get job IDs from a single page
-def get_job_ids(page_number, proxies, title, location):
+def get_job_ids(page_number, title, location):
     start = page_number * results_per_page
 
-    for title in title:
-        for location in location:
-            list_url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={title}&location={location}&start={start}"
+    list_url = f"https://www.linkedin.com/jobs-guest/jobs/api/seeMoreJobPostings/search?keywords={title}&location={location}&start={start}"
     
-    proxy = {'http': random.choice(proxies)}
-    response = requests.get(list_url, proxies=proxy)
+    response = requests.get(list_url)
     list_data = response.text
     list_soup = BeautifulSoup(list_data, "html.parser")
     page_jobs = list_soup.find_all("li")
@@ -54,17 +35,10 @@ def get_job_ids(page_number, proxies, title, location):
             id_list.append(job_id)
     return id_list
 
-url = "https://raw.githubusercontent.com/TheSpeedX/SOCKS-List/master/http.txt" 
-"""
-url = "https://proxylist.geonode.com/api/proxy-list?limit=500&page=1&sort_by=lastChecked&sort_type=desc"
-"""
-proxies = load_proxies(url)
-
 # Function to get job details from job ID
-def get_job_details(job_id, proxies):
+def get_job_details(job_id):
     job_url = f"https://www.linkedin.com/jobs-guest/jobs/api/jobPosting/{job_id}"
-    proxy = {'http': random.choice(proxies)}
-    job_response = requests.get(job_url, proxies=proxy)
+    job_response = requests.get(job_url)
     
     if job_response.status_code == 200:
         job_soup = BeautifulSoup(job_response.text, "html.parser")
@@ -111,10 +85,10 @@ def get_job_details(job_id, proxies):
 
 # Loop through a specified number of pages (adjust the range as needed)
 for page_number in range(10):  # Change 10 to the number of pages you want to scrape
-    id_list = get_job_ids(page_number, proxies, title, location)
+    id_list = get_job_ids(page_number, title, location)
     
     for job_id in id_list:
-        job_details = get_job_details(job_id, proxies)
+        job_details = get_job_details(job_id)
         if job_details:
             job_list.append(job_details)
 
@@ -122,5 +96,4 @@ for page_number in range(10):  # Change 10 to the number of pages you want to sc
 jobs_df = pd.DataFrame(job_list)
 
 # Save data to CSV file
-jobs_df.to_csv('items1.csv', mode='a', index=False, header=False)
-
+jobs_df.to_csv('items2.csv', mode='a', index=False, header=False)

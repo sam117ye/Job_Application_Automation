@@ -13,6 +13,7 @@ import os
 from load import load_files, get_gpt_embedding
 from data_base import hash_password, get_db_connection
 from authentication import display_login, display_register
+
 from scrappy import get_job_ids, get_job_details
 
 # Session state management
@@ -82,6 +83,7 @@ if st.session_state.logged_in:
 
             conn.commit()
             st.success('User information saved successfully')
+        
 
         st.title('Information about job preference')
 
@@ -164,7 +166,7 @@ if st.session_state.logged_in:
             except Exception as e:
                 st.error(f"An error occurred: {e}")
 
-    elif selected == 'Generate Cover Letter':
+    if selected == 'Generate Cover Letter':
         st.title('Cover Letter Generator')
 
         # Load job title and company name from the Predicted_Jobs table
@@ -176,24 +178,20 @@ if st.session_state.logged_in:
 
         st.write("Provide additional details for the cover letter:")
 
-        # Display loaded job title and company name
-        st.text_input("Job Title", job_title, disabled=True)
-        st.text_input("Company Name", company_name, disabled=True)
-
         if st.button("Generate Cover Letter"):
             user_id = c.execute("SELECT id FROM Users ORDER BY id DESC LIMIT 1").fetchone()[0]
-            user_info = c.execute("SELECT * FROM Users WHERE id=?", (user_id,)).fetchone()
+            user_info = c.execute("SELECT * FROM personal WHERE user_id=?", (user_id,)).fetchone()
             job_pref = c.execute("SELECT * FROM Job_preference WHERE user_id=?", (user_id,)).fetchone()
-            experience = c.execute("SELECT * FROM experience WHERE user_id=?", (user_id,)).fetchone()
+            experience = c.execute("SELECT * FROM Experience WHERE user_id=?", (user_id,)).fetchone()
 
-            user_name, country, street, street_number, city, state, zip_code, email, phone = user_info[1:]
-            company_location, seniority_level, employment_type, job_description = job_pref[1:-1]
-            education, user_experience, reason, closing_statement = experience[1:-1]
+            name, country, street, street_number, city, state, zip_code, email, phone = user_info[1:10]
+            company_location, seniority_level, employment_type, job_description = job_pref[1:5]
+            education, user_experience, reason, closing_statement = experience[1:5]
 
             cover_letter_prompt = f"""
             Generate an application letter for the position of {job_title} at {company_name}.
             Here is the applicant's information:
-            - Name: {user_name}
+            - Name: {name}
             - Address: {street} {street_number}, {city}, {state}, {zip_code}, {country}
             - Email: {email}
             - Phone: {phone}
@@ -207,7 +205,6 @@ if st.session_state.logged_in:
             - Closing Statement: {closing_statement}
             """
 
-    
             response = openai.Completion.create(
                 engine="gpt-3.5-turbo-instruct",
                 prompt=cover_letter_prompt,
@@ -218,44 +215,34 @@ if st.session_state.logged_in:
             st.write("Generated Cover Letter:")
             st.write(cover_letter_text)
 
-            # Save the cover letter in a PDF
-            pdf = FPDF()
-            pdf.add_page()
-            pdf.set_font("Arial", size=12)
-
-            for line in cover_letter_text.split('\n'):
-                pdf.cell(200, 10, txt=line, ln=True)
-
-            pdf_output = f"cover_letter_{user_name.replace(' ', '_')}.pdf"
-            pdf.output(pdf_output)
-
-            # Allow the user to download the PDF
-            with open(pdf_output, "rb") as pdf_file:
-                PDFbyte = pdf_file.read()
-                st.download_button(label="Download PDF", data=PDFbyte, file_name=pdf_output, mime='application/octet-stream')
-
-            # Clean up the temporary PDF file
-            os.remove(pdf_output)
-
     elif selected == 'Scraper':
         st.title('Scraper')
-        job_title = st.text_input("Job Title")
-        location = st.text_input("Location")
-        num_jobs = st.number_input("Number of Jobs to Scrape", min_value=1, step=1, value=10)
+
+        title = st.text_input('Job Title')
+        location = st.text_input('Location')
+        pages_to_scrape = st.number_input('Number of Pages to Scrape', min_value=1, max_value=100)
+        results_per_page = st.number_input('Results Per Page', min_value=1, max_value=100)
 
         if st.button("Scrape Jobs"):
-            job_ids = get_job_ids(job_title, location, num_jobs)
-            jobs_data = []
 
-            for job_id in job_ids:
-                job_details = get_job_details(job_id)
-                jobs_data.append(job_details)
+            job_list = []
+            for page_number in range(pages_to_scrape):
+                id_list = get_job_ids(page_number, title, location, results_per_page)
+                for job_id in id_list:
+                    job_details = get_job_details(job_id)
+                    if job_details:
+                        job_list.append(job_details)
+            if job_list:
+                jobs_df = pd.DataFrame(job_list)
+                st.write(jobs_df)
+                # Save data to CSV file
+                csv_path = os.path.join(os.getcwd(), 'jobs.csv')
+                jobs_df.to_csv(csv_path, index=False)
+                st.success(f"Scraped data saved to {csv_path}")
+            else:
+                st.warning("No jobs found or an error occurred during scraping.")
 
-            jobs_df = pd.DataFrame(jobs_data)
-            st.write(jobs_df)
-            csv = jobs_df.to_csv(index=False).encode('utf-8')
-            st.download_button("Download CSV", data=csv, file_name="jobs.csv", mime='text/csv')
-
+        
 # Close the database connection
 conn.close()
 
