@@ -1,6 +1,6 @@
-# Job Application Auotmation
+# Job Application Automation
 
-This application simplifies job searching and application process by matching users experince and interest with job postings on linkedn. 
+This application simplifies job searching and application process by matching users experince and interest with job postings on linkedn.
 
 ## Description
 
