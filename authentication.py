@@ -42,3 +42,4 @@ def display_register(c):
             st.experimental_rerun()
         else:
             st.error('Password does not match')
+
