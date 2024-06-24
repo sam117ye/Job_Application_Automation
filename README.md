@@ -4,7 +4,7 @@ This application simplifies job searching and application process by matching us
 
 ## Description
 
-This project integrates various technologies including Streamlit for web app development, SQLite for database management, Keras for machine learning model operations, and several others to provide a comprehensive solution for [specific problem or functionality]. It includes functionalities such as user authentication, data processing, and job scraping from web sources.
+This project integrates various technologies including Streamlit for web app development, SQLite for database management, Keras for machine learning model operations, and several others to provide a comprehensive solution for jon application proccess. It includes functionalities such as user authentication, data processing, and job scraping from web sources.
 
 ### Dependencies
 
